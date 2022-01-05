@@ -27,6 +27,12 @@ class TopicNew(CreateView):
 class TopicView(DetailView):
     model = Topic
 
+    def get_context_data(self, **kwargs):
+        # 取得回覆資料傳給頁面範本處理
+        ctx = super().get_context_data(**kwargs)
+        ctx['reply_list'] = Reply.objects.filter(topic=self.object)
+        return ctx
+
     def get_object(self):
         topic = super().get_object()    # 取得欲查看的討論主題
         topic.hits += 1     # 等同 topic.hits = topic.hits + 1
@@ -50,7 +56,7 @@ class TopicReply(CreateView):
     def get_success_url(self):
         return reverse('topic_view', args=[self.kwargs['tid']])
 
-    # 刪除討論主題
+# 刪除討論主題
 class TopicDelete(PermissionRequiredMixin, DeleteView):
     permission_required = 'topic.delete_topic'
     model = Topic
